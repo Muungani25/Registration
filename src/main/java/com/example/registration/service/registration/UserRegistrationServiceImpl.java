@@ -3,9 +3,13 @@ package com.example.registration.service.registration;
 import com.example.registration.domain.ERole;
 import com.example.registration.domain.Role;
 import com.example.registration.domain.User;
+import com.example.registration.dto.JwtResponse;
+import com.example.registration.dto.RegisteredUser;
 import com.example.registration.dto.SignUpRequest;
 import com.example.registration.repository.RoleRepository;
 import com.example.registration.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,8 +36,6 @@ public class UserRegistrationServiceImpl implements UserRegistrationService{
         this.passwordEncoder = passwordEncoder;
 
     }
-
-
     @Override
     public ResponseEntity<String> registerUser(SignUpRequest signUpRequest, Boolean isAdmin) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
@@ -65,5 +67,23 @@ public class UserRegistrationServiceImpl implements UserRegistrationService{
     @Override
     public List<User> returnUser() {
         return userRepository.findAll();
+    }
+
+    @Override
+    public Page<User> returnPagedUsers(int offset,int pagesize) {
+        return userRepository.findAll(PageRequest.of(offset,pagesize));
+    }
+    public ResponseEntity<RegisteredUser> findById(Long id){
+        Optional<User> user=userRepository.findById(id);
+        if(!user.isPresent()){
+            throw new IllegalStateException("the user id does not exist");
+        }
+        RegisteredUser response= RegisteredUser.builder()
+                .id(user.get().getId())
+                .firstname(user.get().getFirstname())
+                .lastname(user.get().getLastname())
+                .username(user.get().getUsername())
+                .build();
+        return ResponseEntity.ok(response);
     }
 }

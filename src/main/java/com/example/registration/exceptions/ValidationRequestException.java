@@ -1,4 +1,4 @@
-package zw.co.afrosoft.epayments.exceptions;
+package com.example.registration.exceptions;
 
 public class ValidationRequestException extends RuntimeException{
     public ValidationRequestException(String message) {

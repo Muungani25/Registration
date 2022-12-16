@@ -1,6 +1,4 @@
-package zw.co.afrosoft.epayments.exceptions;
-
-import java.time.ZonedDateTime;
+package com.example.registration.exceptions;
 
 public class ValidationException {
     private final String message;

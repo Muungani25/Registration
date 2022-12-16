@@ -16,7 +16,6 @@ public class JwtUtil {
 
     @Value("864000000")
     private int jwtExpirationMs;
-
     public Claims getClaims(final String token) {
         try {
             Claims body = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(token).getBody();

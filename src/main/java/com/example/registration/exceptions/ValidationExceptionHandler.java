@@ -1,4 +1,4 @@
-package zw.co.afrosoft.epayments.exceptions;
+package com.example.registration.exceptions;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

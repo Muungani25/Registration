@@ -1,52 +1,44 @@
 package com.example.registration.controller;
 
 import com.example.registration.domain.User;
-
-import com.example.registration.dto.RegisteredUser;
 import com.example.registration.dto.SignInRequest;
 import com.example.registration.dto.SignUpRequest;
-import com.example.registration.repository.UserRepository;
-import com.example.registration.service.login.UserLoginService;
+import com.example.registration.service.authentication.AuthenticationService;
 import com.example.registration.service.registration.UserRegistrationService;
-import org.springframework.data.domain.Page;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.annotation.PostConstruct;
 
 @RestController
 @RequestMapping("/api/auth")
-
+@RequiredArgsConstructor
+@Slf4j
 public class AuthController {
-    private UserRegistrationService userRegistrationService;
-    private UserLoginService userLoginService;
+    private final UserRegistrationService userRegistrationService;
+    private final AuthenticationService authenticationService;
 
-
-    public AuthController(UserRegistrationService userRegistrationService, UserLoginService userLoginService, UserRepository userRepository) {
-        this.userRegistrationService = userRegistrationService;
-        this.userLoginService = userLoginService;
-
-    }
     @PostMapping("/signin")
     public ResponseEntity<?> signin(@RequestBody SignInRequest signInRequest) {
-        return userLoginService.signInUser(signInRequest);
+        return authenticationService.signInUser(signInRequest);
     }
 
     @PostMapping("/signup")
     public ResponseEntity<String> signup(@RequestBody SignUpRequest signUpRequest) {
-        return userRegistrationService.registerUser(signUpRequest, false);
+        return userRegistrationService.registerUser(signUpRequest);
+    }
+    @PostMapping("/user")
+    public User returnUser(@RequestBody String username){
+        log.info("user:{}",username);
+        User user= userRegistrationService.returnUser(username);
+        return user;
     }
 
-//    @PostMapping("/admin/signup")
-//    public ResponseEntity<String> adminSignup(@RequestBody SignUpRequest signUpRequest) {
-//        return userRegistrationService.registerUser(signUpRequest, true);
-//    }
-    @GetMapping("/allusers/{offset}/{pagesize}")
-   public Page<User> findAllUsers(@PathVariable int offset, @PathVariable int pagesize){
-        return userRegistrationService.returnPagedUsers(offset,pagesize);
-    }
-    @GetMapping("/user/{id}")
-        public ResponseEntity<RegisteredUser> users(@PathVariable Long id){
-        return userRegistrationService.findById(id);
+    @PostConstruct
+    public void initiateRoles(){
+
+        userRegistrationService.initiateRoles();
     }
 }

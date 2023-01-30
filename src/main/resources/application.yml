@@ -1,5 +1,31 @@
 spring:
   application:
-    name: registration
-  config:
-    import: configserver:${CONFIG_SERVER_URI}
+    name: auth-service
+  datasource:
+    url: jdbc:sqlserver://52.4.172.195;instance=.;DatabaseName=instalipa_authentication_dev;encrypt=true;trustServerCertificate=true
+    driver-class-name: com.microsoft.sqlserver.jdbc.SQLServerDriver
+    username: sa
+    password: '%$Afro123'
+  jpa:
+    hibernate:
+      ddl-auto: update
+      database-platform: org.hibernate.dialect.SQLServerDialect
+      show-sql: true
+      format_sql: true
+    open-in-view: true
+
+server:
+  port: 8441
+
+eureka:
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: http://44.196.149.62:8445/eureka/
+  instance:
+    prefer-ip-address: true
+
+authentication:
+  signing-key: 'instalipa@afrosoft'
+  jwt-expiration-time: 300000

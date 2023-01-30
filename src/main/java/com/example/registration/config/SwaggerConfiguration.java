@@ -20,8 +20,8 @@ public class SwaggerConfiguration {
 
     private Info apiInfo() {
         return new Info()
-                .title("Registration Service API")
-                .description("REST API to get end points for registering to the TODO app.")
+                .title("Authentication Service API")
+                .description("performs authentication and authorization of users.")
                 .version("2.0")
                 .contact(apiContact())
                 .license(apiLicense());

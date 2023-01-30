@@ -3,15 +3,13 @@ package com.example.registration.service.registration;
 import com.example.registration.domain.ERole;
 import com.example.registration.domain.Role;
 import com.example.registration.domain.User;
-import com.example.registration.dto.JwtResponse;
-import com.example.registration.dto.RegisteredUser;
 import com.example.registration.dto.SignUpRequest;
 import com.example.registration.repository.RoleRepository;
 import com.example.registration.repository.UserRepository;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -22,6 +20,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Service
+@Slf4j
 public class UserRegistrationServiceImpl implements UserRegistrationService{
     private UserRepository userRepository;
     private RoleRepository roleRepository;
@@ -37,53 +36,47 @@ public class UserRegistrationServiceImpl implements UserRegistrationService{
 
     }
     @Override
-    public ResponseEntity<String> registerUser(SignUpRequest signUpRequest, Boolean isAdmin) {
+    public ResponseEntity<String> registerUser(SignUpRequest signUpRequest) {
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("username is already taken");
         }
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("email is already taken");
-        }
+
         String hashedPassword = passwordEncoder.encode(signUpRequest.getPassword());
         Set<Role> roles = new HashSet<>();
-        Optional<Role> userRole = isAdmin ? roleRepository.findByName(ERole.ROLE_ADMIN) : roleRepository.findByName(ERole.ROLE_USER);
+        Optional<Role> userRole = roleRepository.findByName(ERole.USER);
 
         if (!userRole.isPresent()) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("role not found");
         }
         roles.add(userRole.get());
         User user = new User();
-        user.setFirstname(signUpRequest.getFirstname());
-        user.setLastname(signUpRequest.getLastname());
         user.setUsername(signUpRequest.getUsername());
-        user.setEmail(signUpRequest.getEmail());
         user.setPassword(hashedPassword);
         user.setRoles(roles);
         userRepository.save(user);
-
         return ResponseEntity.ok("User registered successfully  please sign in");
     }
 
     @Override
-    public List<User> returnUser() {
-        return userRepository.findAll();
+    public User returnUser(String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("User not found with username" + username));
+        log.info("user: {}", user.toString());
+        return user;
     }
 
     @Override
-    public Page<User> returnPagedUsers(int offset,int pagesize) {
-        return userRepository.findAll(PageRequest.of(offset,pagesize));
-    }
-    public ResponseEntity<RegisteredUser> findById(Long id){
-        Optional<User> user=userRepository.findById(id);
-        if(!user.isPresent()){
-            throw new IllegalStateException("the user id does not exist");
+    public void initiateRoles() {
+        Optional<Role> role = roleRepository.findByName(ERole.USER);
+        Boolean isRolePresent = role.isPresent();
+        if (!isRolePresent) {
+            Role userRole = new Role();
+            userRole.setName(ERole.USER);
+            roleRepository.save(userRole);
+
+            Role adminRole = new Role();
+            adminRole.setName(ERole.ADMIN);
+            roleRepository.save(adminRole);
         }
-        RegisteredUser response= RegisteredUser.builder()
-                .id(user.get().getId())
-                .firstname(user.get().getFirstname())
-                .lastname(user.get().getLastname())
-                .username(user.get().getUsername())
-                .build();
-        return ResponseEntity.ok(response);
+
     }
 }

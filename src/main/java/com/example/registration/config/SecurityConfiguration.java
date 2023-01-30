@@ -3,6 +3,7 @@ package com.example.registration.config;
 import com.example.registration.filter.AuthTokenFilter;
 import com.example.registration.service.AuthEntryPointJwt;
 import com.example.registration.service.UserDetailsServiceImpl;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -20,26 +21,16 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@RequiredArgsConstructor
 public class SecurityConfiguration {
-    private UserDetailsServiceImpl userDetailsService;
-    private AuthEntryPointJwt authEntryPointJwt;
-    private AuthTokenFilter authTokenFilter;
+    private final UserDetailsServiceImpl userDetailsService;
+    private final AuthEntryPointJwt authEntryPointJwt;
+    private final AuthTokenFilter authTokenFilter;
 
-    public SecurityConfiguration(UserDetailsServiceImpl userDetailsService, AuthEntryPointJwt authEntryPointJwt, AuthTokenFilter authTokenFilter) {
-        this.userDetailsService = userDetailsService;
-        this.authEntryPointJwt = authEntryPointJwt;
-        this.authTokenFilter = authTokenFilter;
-    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -70,7 +61,6 @@ public class SecurityConfiguration {
         http.addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
-
     @Bean
     CorsConfigurationSource corsConfigurationSource(){
         CorsConfiguration corsConfiguration = new CorsConfiguration();

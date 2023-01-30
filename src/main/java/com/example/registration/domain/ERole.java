@@ -1,7 +1,7 @@
 package com.example.registration.domain;
 
 public enum ERole {
-    ROLE_USER,
-    ROLE_ADMIN,
-    ROLE_MODERATOR
+    USER,
+    ADMIN,
+
 }

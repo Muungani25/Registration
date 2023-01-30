@@ -3,6 +3,7 @@ package com.example.registration.util;
 import com.example.registration.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import lombok.extern.log4j.Log4j2;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -10,11 +11,12 @@ import java.util.Date;
 
 @Component
 @Log4j2
+@Slf4j
 public class JwtUtil {
-    @Value("mysecret")
+    @Value("${authentication.signing-key}")
     private String jwtSecret;
 
-    @Value("864000000")
+    @Value("${authentication.jwt-expiration-time}")
     private int jwtExpirationMs;
     public Claims getClaims(final String token) {
         try {
@@ -29,6 +31,7 @@ public class JwtUtil {
     public String generateJwtToken(Authentication authentication) {
         UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
         Claims claims = Jwts.claims().setSubject(String.valueOf(authentication));
+        log.info("claims : {}", claims);
         return Jwts.builder().setClaims(claims).setSubject((userPrincipal.getUsername())).setIssuedAt(new Date())
                 .setExpiration(new Date((new Date()).getTime() + jwtExpirationMs)).signWith(SignatureAlgorithm.HS512, jwtSecret)
                 .compact();
